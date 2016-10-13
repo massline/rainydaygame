@@ -1,0 +1,36 @@
+var state = {target: 200, mouse: 200};
+// paste this in the javascript console to run the bot
+var loop = function () {
+    c = document.getElementById("squidContainer");
+    ctx = c.getContext("2d");
+
+    // I just fiddled with these numbers until I was getting the right amount of pixels
+    var x1 = (c.width / 2) - 200;
+    var x2 = (c.width / 2) + 50;
+    var y = c.height - 470;
+
+    // get pixel data from the canvas
+    var data = ctx.getImageData(x1, y, x2 - x1, 1).data;
+
+    // check each pixel for brighter than average colors
+    for (var i = 0; i < x2 - x1; i++) {
+        // sum up colors
+        var rgb_sum = data[i * 4] + data[i * 4 + 1] + data[i * 4 + 2];
+        // if we find something that is bright:
+        if (rgb_sum >= 128 * 3) {
+            // set the target location for mouse, mouse will move to this location
+            state.target = i;
+            break;
+        }
+    }
+    
+    // recompute mouse position
+    state.mouse = state.target + (state.mouse - state.target) / 2;
+    // send mouse move event to game
+    document.onmousemove({
+        pageX: state.mouse + x1 - 10,
+        pageY: y
+    });
+
+};
+setInterval(loop, 20);
